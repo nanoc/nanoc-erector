@@ -4,9 +4,7 @@ require 'helper'
 
 class Nanoc::Erector::FilterTest < Minitest::Test
 
-  def test_filter
-    # Create filter
-    template = <<-EOF
+  TEMPLATE = <<-EOF
       class ErectorTemplate < Erector::Widget
         def content
           html {
@@ -20,7 +18,10 @@ class Nanoc::Erector::FilterTest < Minitest::Test
         end
       end
     EOF
-    layout = Nanoc::Layout.new(template, {}, '/default/')
+
+  def test_filter
+    # Create filter
+    layout = Nanoc::Layout.new(TEMPLATE, {}, '/default/')
     assigns = { :layout => layout, :content => 'Mr. Payne' }
     filter = ::Nanoc::Erector::Filter.new(assigns)
 
@@ -35,6 +36,31 @@ class Nanoc::Erector::FilterTest < Minitest::Test
 
     # Run filter
     assert_raises(Nanoc::Erector::Filter::OutsideLayoutError) do
+      filter.setup_and_run("Mr. Payne")
+    end
+  end
+
+  def test_filter_undefined_second_time
+    # Run once
+    layout = Nanoc::Layout.new(TEMPLATE, {}, '/default/')
+    assigns = { :layout => layout, :content => 'Mr. Payne' }
+    filter = ::Nanoc::Erector::Filter.new(assigns)
+    filter.setup_and_run("Mr. Payne")
+
+    # Run again, but fail this time
+    layout = Nanoc::Layout.new('$fun = :friday', {}, '/default/')
+    assigns = { :layout => layout, :content => 'Mr. Payne' }
+    filter = ::Nanoc::Erector::Filter.new(assigns)
+    assert_raises(NameError) do
+      filter.setup_and_run("Mr. Payne")
+    end
+  end
+
+  def test_filter_with_undefined_custom_name
+    layout = Nanoc::Layout.new(TEMPLATE.sub('ErectorTemplate', 'Foo'), {}, '/default/')
+    assigns = { :layout => layout, :content => 'Mr. Payne' }
+    filter = ::Nanoc::Erector::Filter.new(assigns)
+    assert_raises(NameError) do
       filter.setup_and_run("Mr. Payne")
     end
   end

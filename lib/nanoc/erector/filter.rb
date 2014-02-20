@@ -21,11 +21,17 @@ module Nanoc::Erector
         raise OutsideLayoutError
       end
 
-      template = params.fetch(:class, 'ErectorTemplate')
+      class_name = params.fetch(:class, 'ErectorTemplate').to_sym
       options = params.fetch(:erector, {})
 
+      begin
+        klass = Object.const_get(class_name)
+        Object.send(:remove_const, class_name)
+      rescue NameError
+      end
+
       eval(@assigns[:layout].raw_content, TOPLEVEL_BINDING, filename)
-      Object.const_get(template).new(assigns).to_html(options)
+      Object.const_get(class_name).new(assigns).to_html(options)
     end
 
   end
