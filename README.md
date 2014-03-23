@@ -6,6 +6,8 @@
 
 This provides a filter for [Erector](http://erector.rubyforge.org/).
 
+Works with nanoc 3.x.
+
 ## Installation
 
 `gem install nanoc-erector`
