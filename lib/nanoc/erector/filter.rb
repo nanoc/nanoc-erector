@@ -6,7 +6,7 @@ module Nanoc::Erector
 
   class Filter < Nanoc::Filter
 
-    class OutsideLayoutError < ::Nanoc::Errors::GenericTrivial
+    class OutsideLayoutError < ::StandardError
 
       def message
         'The erector filter can only be used as a layout filter.'
@@ -30,7 +30,14 @@ module Nanoc::Erector
       rescue NameError
       end
 
-      eval(@assigns[:layout].raw_content, TOPLEVEL_BINDING, filename)
+      content =
+        begin
+          @assigns[:layout].raw_content
+        rescue NoMethodError
+          @assigns[:layout].content.string
+        end
+
+      eval(content, TOPLEVEL_BINDING, filename)
       Object.const_get(class_name).new(assigns).to_html(options)
     end
 
