@@ -30,14 +30,7 @@ module Nanoc::Erector
       rescue NameError
       end
 
-      content =
-        begin
-          @assigns[:layout].raw_content
-        rescue NoMethodError
-          @assigns[:layout].content.string
-        end
-
-      eval(content, TOPLEVEL_BINDING, filename)
+      eval(@assigns[:layout].content.string, TOPLEVEL_BINDING, filename)
       Object.const_get(class_name).new(assigns).to_html(options)
     end
 
